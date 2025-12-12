@@ -16,7 +16,12 @@ fn ensure_make_py_exists(make_py_file: String) {
 
 // Function to get venv path using 'uv'
 fn get_venv_path_from_uv() -> Option<String> {
-    let output = Command::new("uv").arg("venv").arg("--info").output();
+    let output = Command::new("uv")
+        .arg("run")
+        .arg("python")
+        .arg("-c")
+        .arg("import os; print(os.environ['VIRTUAL_ENV'])")
+        .output();
 
     // If uv command fails (e.g., uv is not installed), return None to fall back to poetry
     let result = match output {
@@ -29,7 +34,6 @@ fn get_venv_path_from_uv() -> Option<String> {
     }
 
     let stdout = String::from_utf8_lossy(&result.stdout);
-    // uv venv --info outputs the path directly
     let venv_path = stdout.trim().to_string();
 
     if venv_path.is_empty() {
